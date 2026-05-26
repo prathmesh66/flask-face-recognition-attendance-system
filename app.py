@@ -139,68 +139,8 @@ def api_attendance_stats():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-# ==================== Model Training API ====================
 
-@app.route('/api/train_model', methods=['POST'])
-@login_required
-@admin_required
-def api_train_model():
-    try:
-        data_dir = "data_img"
-        if not os.path.exists(data_dir):
-            return jsonify({"error": "Data directory 'data_img' not found!"}), 400
-
-        path = [os.path.join(data_dir, file) for file in os.listdir(data_dir)]
-
-        if len(path) == 0:
-            return jsonify({"error": "No images found in 'data_img'. Please generate dataset first!"}), 400
-
-        faces = []
-        ids = []
-        id_map = {}  # Map string IDs to integer IDs
-        current_int_id = 0
-
-        for image in path:
-            img = Image.open(image).convert('L')  # convert in gray scale
-            imageNp = np.array(img, 'uint8')
-            filename = os.path.split(image)[1]
-            parts = filename.split('.')
-
-            if len(parts) >= 3:
-                string_id = parts[1]  # Get the student ID part
-
-                # Map string ID to integer ID if not already mapped
-                if string_id not in id_map:
-                    id_map[string_id] = current_int_id
-                    current_int_id += 1
-
-                int_id = id_map[string_id]
-
-                faces.append(imageNp)
-                ids.append(int_id)
-
-        if len(faces) == 0:
-            return jsonify({"error": "No valid images found for training!"}), 400
-
-        ids = np.array(ids)
-
-        # Save the ID mapping for later use in recognition
-        import pickle
-        with open("id_mapping.pkl", "wb") as f:
-            pickle.dump(id_map, f)
-
-        # Train Classifier
-        clf = cv2.face.LBPHFaceRecognizer_create()
-        clf.train(faces, ids)
-        clf.write("clf.xml")
-
-        return jsonify({
-            "message": f"Training Dataset Completed!\nProcessed {len(faces)} images from {len(id_map)} students."
-        })
-
-    except Exception as e:
-        print(f"Training error: {e}")
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+'''
+# Public Showcase Version
+# Certain sensitive/internal implementation details have been intentionally omitted for security and project protection purposes.
+'''
