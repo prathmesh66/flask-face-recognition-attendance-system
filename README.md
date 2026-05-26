@@ -1,50 +1,151 @@
 # Face Recognition Attendance System (Flask + OpenCV)
 
-A web-based attendance system that uses face recognition (OpenCV LBPH) to mark attendance and manage students.
+> **⚠️ Public Showcase Repository**  
+> This repository contains a public showcase version of the project.  
+> Certain sensitive/internal implementation details and advanced logic have been intentionally simplified or removed for security and project protection purposes.
+
+# 🎥 Project Demo
+
+> Click the thumbnail below to watch the full working demo of the project.
+
+[![Face Recognition Attendance System](https://img.youtube.com/vi/UfwXV1CNXo4/maxresdefault.jpg)](https://youtu.be/UfwXV1CNXo4)
+
+---
+
+## Project Overview
+
+A web-based attendance management system built using Flask and OpenCV LBPH face recognition for automated student attendance tracking and management.
+
+---
+
+## Tech Stack
+
+- Python
+- Flask
+- OpenCV
+- MySQL
+- HTML/CSS/JavaScript
+
+---
 
 ## Features
-- User login/registration (Flask + Flask-WTF)
-- Role-based access (admin/user)
-- Student CRUD + photo capture for training
-- Face recognition API
-- Attendance marking + export
+
+- User login & registration system
+- Role-based access control (Admin/User)
+- Student CRUD operations
+- Student image capture & training
+- Face recognition attendance marking
+- Attendance export functionality
+- Flask-WTF form validation
+- MySQL database integration
+
+---
 
 ## Project Setup
-### 1) Install dependencies
+
+### 1) Clone Repository
+
+```bash
+git clone https://github.com/prathmesh66/flask-face-recognition-attendance-system.git
+```
+
+### 2) Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+### 3) Activate Virtual Environment
+
+For Windows PowerShell:
+
+```bash
+.\venv\Scripts\Activate
+```
+
+For CMD:
+
+```bash
+venv\Scripts\activate
+```
+
+### 4) Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2) Configure MySQL
-Update `DB_CONFIG` in `app.py`:
-- `host`, `user`, `password`, `database`, `port`
+### 5) Configure MySQL Database
 
-### 3) Create database tables
-Run the DB setup script:
+Update `DB_CONFIG` inside `app.py`:
+
+- host
+- user
+- password
+- database
+- port
+
+### 6) Create Database Tables
+
 ```bash
 python databaseTest.py
 ```
 
-### 4) Run the application
+### 7) Run Application
+
 ```bash
 python app.py
 ```
 
-Then open the app in your browser (usually `http://127.0.0.1:5000`).
+Open in browser:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
 
 ## Usage
-1. Register and verify email (if enabled)
-2. Login as admin
-3. Go to **Students** → add students + capture photos
-4. Go to **Train Model** → train the recognizer (creates `clf.xml` and `id_mapping.pkl`)
-5. Go to **Face Recognition** → upload/capture a face to mark attendance
+
+1. Register/Login to the system
+2. Login as Admin
+3. Add students and capture images
+4. Train the face recognition model
+5. Start face recognition attendance system
+6. Export attendance records if needed
+
+---
+
+## Important Files
+
+- `haarcascade_frontalface_default.xml` → OpenCV face detection cascade
+- `clf.xml` → Trained face recognition model
+- `id_mapping.pkl` → Student ID mapping
+- `data_img/` → Stores training images
+
+---
 
 ## Notes
-- `data_img/` stores training images.
-- `clf.xml` and `id_mapping.pkl` are generated after training.
+
+- Ensure MySQL service is running before starting the application.
+- Train the model before using face recognition attendance.
+- Email functionality requires Flask-Mail configuration.
+
+---
 
 ## Troubleshooting
-- If face recognition says the model is not trained, run `/train` first.
-- Ensure your MySQL service is running.
-- For email sending, configure Flask-Mail credentials in `app.py`.
 
+### Model Not Trained
+
+If attendance recognition fails, retrain the model from the application dashboard.
+
+### Database Connection Error
+
+- Ensure MySQL server is running
+- Verify database credentials in `app.py`
+
+### Missing Dependencies
+
+```bash
+pip install -r requirements.txt
+```
