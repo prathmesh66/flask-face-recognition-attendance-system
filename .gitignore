@@ -1,1 +1,49 @@
-dataset/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# Test / tooling
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask / uploads / generated artifacts
+uploads/
+*.db
+*.sqlite3
+*.sqlite
+attendance.csv
+ateendence.txt
+attednve dCore Framework & Libraries.txt
+
+# Face recognition generated files
+clf.xml
+id_mapping.pkl
+
+# Images/videos stored locally
+data_img/
+
+# Logs
+*.log
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+

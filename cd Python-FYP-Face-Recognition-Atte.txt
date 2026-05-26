@@ -1,0 +1,3 @@
+cd Python-FYP-Face-Recognition-Attendence-System && Python -m venv venv && venv\Scripts\activate && python -m pip install -r requirements.txt
+
+cd Python-FYP-Face-Recognition-Attendence-System && Python -m venv venv && venv\Scripts\activate 

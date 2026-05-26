@@ -1,0 +1,1139 @@
+{% extends "base.html" %}
+
+{% block title %}Student Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('student') }}">
+                            <i class="fas fa-user-graduate"></i> Students
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('face_recognition') }}">
+                            <i class="fas fa-camera"></i> Face Recognition
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('train') }}">
+                            <i class="fas fa-brain"></i> Train Model
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('attendance') }}">
+                            <i class="fas fa-clipboard-list"></i> Attendance
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+            <div
+                class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Student Management</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                    <i class="fas fa-plus"></i> Add Student
+                </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search students...">
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="studentsTable">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Roll No</th>
+                            <th>Department</th>
+                            <th>Course</th>
+                            <th>Year</th>
+                            <th>Semester</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <!-- Students will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Students pagination">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Pagination will be generated here -->
+                </ul>
+            </nav>
+        </main>
+    </div>
+</div>
+
+<!-- Add/Edit Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="studentForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="studentIdHidden" name="student_id">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="studentId">Student ID</label>
+                                <input type="text" class="form-control" id="studentId" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="studentName">Name</label>
+                                <input type="text" class="form-control" id="studentName" name="name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="department">Department</label>
+                                <select class="form-control" id="department" name="department" required>
+                                    <option value="">Select Department</option>
+                                    <option value="Computer Science Engineering">Computer Science Engineering</option>
+                                    <option value="Chemical Engineering">Chemical Engineering</option>
+                                    <option value="Civil Engineering">Civil Engineering</option>
+                                    <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                    <option value="Architecture">Architecture</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="course">Course</label>
+                                <select class="form-control" id="course" name="course" required>
+                                    <option value="">Select Course</option>
+                                    <option value="BE">BE</option>
+                                    <option value="BT">BT</option>
+                                    <option value="ME">ME</option>
+                                    <option value="AE">AE</option>
+                                    <option value="TS">TS</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="year">Year</label>
+                                <select class="form-control" id="year" name="year" required>
+                                    <option value="">Select Year</option>
+                                    <option value="2026-27">2026-27</option>
+                                    <option value="2027-28">2027-28</option>
+                                    <option value="2028-29">2028-29</option>
+                                    <option value="2029-30">2029-30</option>
+                                    <option value="2030-31">2030-31</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="semester">Semester</label>
+                                <select class="form-control" id="semester" name="semester" required>
+                                    <option value="">Select Semester</option>
+                                    <option value="Semester-1">Semester-1</option>
+                                    <option value="Semester-2">Semester-2</option>
+                                    <option value="Semester-3">Semester-3</option>
+                                    <option value="Semester-4">Semester-4</option>
+                                    <option value="Semester-5">Semester-5</option>
+                                    <option value="Semester-6">Semester-6</option>
+                                    <option value="Semester-7">Semester-7</option>
+                                    <option value="Semester-8">Semester-8</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="division">Division</label>
+                                <select class="form-control" id="division" name="division" required>
+                                    <option value="">Select Division</option>
+                                    <option value="Morning">Morning</option>
+                                    <option value="Evening">Evening</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="rollNo">Roll Number</label>
+                                <input type="text" class="form-control" id="rollNo" name="roll_no" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select class="form-control" id="gender" name="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Others">Others</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="dob">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="mobile">Mobile</label>
+                                <input type="tel" class="form-control" id="mobile" name="mobile" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="teacherName">Teacher Name</label>
+                                <input type="text" class="form-control" id="teacherName" name="teacher_name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="photo">Face Recognition Training Photos</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div id="cameraContainer" style="display: none;">
+                                    <video id="studentCamera" width="100%" height="200" autoplay
+                                        style="border: 1px solid #ccc;"></video>
+                                    <canvas id="studentCanvas" style="display: none;"></canvas>
+                                    <div class="mt-2">
+                                        <div class="progress mb-2" id="captureProgressContainer" style="display: none;">
+                                            <div class="progress-bar bg-success" id="captureProgress" style="width: 0%">
+                                            </div>
+                                        </div>
+                                        <div class="text-center mb-2">
+                                            <span id="captureStatus">Ready to capture</span>
+                                        </div>
+                                        <button type="button" class="btn btn-danger btn-sm" id="stopCaptureBtn"
+                                            style="display: none;">
+                                            <i class="fas fa-stop"></i> Stop Capture
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="photoPreview" class="mt-2" style="display: none;">
+                                    <div class="row" id="thumbnailContainer"></div>
+                                    <input type="hidden" id="photoData" name="photo_data">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-primary btn-sm" id="startCameraBtn">
+                                    <i class="fas fa-video"></i> Start Camera & Capture 20 Photos
+                                </button>
+                                <small class="form-text text-muted">Automatically capture 20 training photos for face
+                                    recognition. Training will start automatically after capture.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Capture Modal -->
+<div class="modal fade" id="photoCaptureModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Capture Photos for Student: <span id="captureStudentName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Live Camera Feed</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <video id="captureVideo" width="100%" height="400" autoplay
+                                    style="border: 1px solid #ccc; max-width: 100%;"></video>
+                                <canvas id="captureCanvas" style="display: none;"></canvas>
+                                <div class="mt-3">
+                                    <button id="startPhotoCapture" class="btn btn-success">
+                                        <i class="fas fa-camera"></i> Start Photo Capture
+                                    </button>
+                                    <button id="stopPhotoCapture" class="btn btn-danger" disabled>
+                                        <i class="fas fa-stop"></i> Stop Capture
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>Capture Progress</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Student ID:</strong> <span id="captureStudentId"></span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Images Captured:</strong> <span id="photoCount">0</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Status:</strong> <span id="captureStatus">Ready</span>
+                                </div>
+                                <div class="progress mb-3">
+                                    <div id="captureProgress" class="progress-bar bg-success" style="width: 0%"></div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Attendance:</strong> <span id="attendanceStatus">Not Marked</span>
+                                </div>
+                                <div id="thumbnailContainer" class="row">
+                                    <!-- Thumbnails will be shown here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="finishCapture" disabled>
+                    <i class="fas fa-check"></i> Finish & Mark Attendance
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this student? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentStudentId = null;
+    let captureStream = null;
+    let isCapturing = false;
+    let photoCount = 0;
+    let maxPhotos = 20; // Reduced for smoother capture
+
+    $(document).ready(function () {
+        loadStudents();
+
+        // Search functionality
+        $('#searchInput').on('keyup', function () {
+            var value = $(this).val().toLowerCase();
+            $("#studentsTableBody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+
+        // Form submission
+        $('#studentForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let isEdit = $('#studentIdHidden').val() !== '';
+            let studentId;
+
+            if (!isEdit) {
+                // Generate new unique student ID for new students
+                const timestamp = Date.now();
+                const random = Math.floor(Math.random() * 1000);
+                studentId = `STU${timestamp}${random}`;
+                $('#studentId').val(studentId);
+                $('#studentIdHidden').val(studentId);
+            } else {
+                // Use existing student ID for edit
+                studentId = $('#studentId').val().trim();
+            }
+
+            console.log('Student ID:', studentId, 'Is Edit:', isEdit);
+
+            // If photos are being captured, don't submit the form normally
+            if (isStudentCapturing) {
+                return;
+            }
+
+            // If we have captured photos, save student first then photos
+            if (capturedPhotos.length > 0) {
+                saveStudentAfterCapture();
+            } else {
+                saveStudent();
+            }
+        });
+
+        // Delete student
+        $('#confirmDelete').on('click', function () {
+            var studentId = $(this).data('student-id');
+            deleteStudent(studentId);
+        });
+
+        // Modal event handlers
+        $('#addStudentModal').on('hidden.bs.modal', function () {
+            $('#studentForm')[0].reset();
+            $('#studentIdHidden').val('');
+            $('#addStudentModalLabel').text('Add Student');
+
+            // Reset photo capture state
+            isStudentCapturing = false;
+            studentPhotoCount = 0;
+            capturedPhotos = [];
+            $('#cameraContainer').hide();
+            $('#photoPreview').hide();
+            $('#captureProgressContainer').hide();
+            $('#startCameraBtn').show();
+            $('#stopCaptureBtn').hide();
+            $('#captureStatus').text('Ready to capture');
+            $('#thumbnailContainer').empty();
+            $('#photoData').val('');
+        });
+
+        $('#photoCaptureModal').on('hidden.bs.modal', function () {
+            stopCameraCapture();
+            resetCaptureState();
+        });
+
+        $('#finishCapture').on('click', finishCapture);
+
+        // Camera functionality for student form
+        $('#startCameraBtn').on('click', startStudentCamera);
+        $('#stopCaptureBtn').on('click', stopStudentCapture);
+    });
+
+    function loadStudents() {
+        $.get('/api/students')
+            .done(function (data) {
+                displayStudents(data.students);
+            })
+            .fail(function () {
+                showAlert('Error loading students', 'danger');
+            });
+    }
+
+    function displayStudents(students) {
+        var tbody = $('#studentsTableBody');
+        tbody.empty();
+
+        students.forEach(function (student) {
+            var row = `
+            <tr>
+                <td>${student.Student_id}</td>
+                <td>${student.Name}</td>
+                <td>${student.Roll_No}</td>
+                <td>${student.Department}</td>
+                <td>${student.Course || 'N/A'}</td>
+                <td>${student.Year}</td>
+                <td>${student.Semester}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-warning" onclick="editStudent('${student.Student_id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="capturePhotos('${student.Student_id}', '${student.Name}')">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('${student.Student_id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+            tbody.append(row);
+        });
+    }
+
+    function saveStudent() {
+        // Ensure student ID is set before creating FormData
+        let studentId = $('#studentId').val().trim();
+        console.log('Initial student ID from form:', studentId);
+
+        if (!studentId) {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            studentId = `STU${timestamp}${random}`;
+            console.log('Generated new student ID:', studentId);
+
+            // Update both visible and hidden fields
+            $('#studentId').val(studentId);
+            $('#studentIdHidden').val(studentId);
+        }
+
+        // Double-check the student ID is set
+        if (!studentId || studentId === '1') {
+            console.error('Student ID is still invalid:', studentId);
+            showAlert('Invalid student ID. Please try again.', 'danger');
+            return;
+        }
+
+        console.log('Final student ID being sent:', studentId);
+
+        // Create form data manually to ensure proper field mapping
+        var formData = new FormData();
+
+        // Add all form fields manually
+        formData.append('student_id', studentId);
+        formData.append('name', $('#studentName').val());
+        formData.append('roll_no', $('#rollNo').val());
+        formData.append('department', $('#department').val());
+        formData.append('course', $('#course').val());
+        formData.append('year', $('#year').val());
+        formData.append('semester', $('#semester').val());
+        formData.append('division', $('#division').val());
+        formData.append('gender', $('#gender').val());
+        formData.append('dob', $('#dob').val());
+        formData.append('email', $('#email').val());
+        formData.append('mobile', $('#mobile').val());
+        formData.append('address', $('#address').val());
+        formData.append('teacher_name', $('#teacherName').val());
+
+        console.log('Form data student_id:', formData.get('student_id'));
+
+        const hiddenStudentId = $('#studentIdHidden').val();
+        const isEdit = hiddenStudentId !== '';
+
+        console.log('Is edit mode:', isEdit);
+
+        const url = isEdit ? `/api/students/${hiddenStudentId}` : '/api/students';
+        const method = isEdit ? 'PUT' : 'POST';
+
+        $.ajax({
+            url: url,
+            type: method,
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                // Mark attendance if photo was captured
+                const photoData = $('#photoData').val();
+                if (photoData && !isEdit) {
+                    // Mark attendance for new student with captured photo
+                    markStudentAttendance(response.student_id || studentId);
+                }
+
+                $('#addStudentModal').modal('hide');
+                loadStudents();
+                showAlert(`Student ${isEdit ? 'updated' : 'added'} successfully${photoData ? ' and attendance marked' : ''}`, 'success');
+                $('#studentForm')[0].reset();
+
+                // Reset camera UI
+                $('#cameraContainer').hide();
+                $('#photoPreview').hide();
+                $('#startCameraBtn').show();
+                $('#photoData').val('');
+            },
+            error: function (xhr) {
+                var error = xhr.responseJSON ? xhr.responseJSON.error : 'Error saving student';
+                console.error('Save student error details:', xhr.responseText);
+                showAlert(error, 'danger');
+            }
+        });
+    }
+
+    function editStudent(studentId) {
+        $.get(`/api/students/${studentId}`)
+            .done(function (student) {
+                $('#studentIdHidden').val(student.Student_id);
+                $('#studentId').val(student.Student_id);
+                $('#studentName').val(student.Name);
+                $('#rollNo').val(student.Roll_No);
+                $('#department').val(student.Department);
+                $('#course').val(student.Course || '');
+                $('#teacherName').val(student.Teacher_Name || '');
+                $('#year').val(student.Year);
+                $('#semester').val(student.Semester);
+                $('#division').val(student.Division);
+                $('#gender').val(student.Gender);
+                $('#dob').val(student.DOB);
+                $('#email').val(student.Email);
+                $('#mobile').val(student.Phone || student.Mobile_No);
+                $('#address').val(student.Address);
+
+                $('#addStudentModalLabel').text('Edit Student');
+                $('#addStudentModal').modal('show');
+            })
+            .fail(function () {
+                showAlert('Error loading student data', 'danger');
+            });
+    }
+
+    function capturePhotos(studentId, studentName) {
+        currentStudentId = studentId;
+        $('#captureStudentId').text(studentId);
+        $('#captureStudentName').text(studentName);
+        $('#photoCaptureModal').modal('show');
+
+        // Start camera after modal is shown
+        setTimeout(() => {
+            startCameraCapture();
+        }, 500);
+    }
+
+    async function startCameraCapture() {
+        try {
+            const video = document.getElementById('captureVideo');
+            captureStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480 }
+            });
+            video.srcObject = captureStream;
+            $('#captureStatus').text('Camera ready - Click "Start Photo Capture"');
+        } catch (err) {
+            console.error('Camera access error:', err);
+            $('#captureStatus').text('Error: Camera access denied');
+            showAlert('Camera access denied. Please allow camera permissions.', 'danger');
+        }
+    }
+
+    function stopCameraCapture() {
+        if (captureStream) {
+            captureStream.getTracks().forEach(track => track.stop());
+            captureStream = null;
+        }
+    }
+
+    function resetCaptureState() {
+        isCapturing = false;
+        photoCount = 0;
+        $('#photoCount').text('0');
+        $('#captureProgress').css('width', '0%');
+        $('#captureStatus').text('Ready');
+        $('#attendanceStatus').text('Not Marked');
+        $('#thumbnailContainer').empty();
+        $('#startPhotoCapture').prop('disabled', false);
+        $('#stopPhotoCapture').prop('disabled', true);
+        $('#finishCapture').prop('disabled', true);
+    }
+
+    $('#startPhotoCapture').on('click', function () {
+        if (!captureStream) {
+            showAlert('Camera not available', 'danger');
+            return;
+        }
+
+        isCapturing = true;
+        photoCount = 0;
+        $('#startPhotoCapture').prop('disabled', true);
+        $('#stopPhotoCapture').prop('disabled', false);
+        $('#captureStatus').text('Capturing photos...');
+        $('#thumbnailContainer').empty();
+
+        capturePhotoLoop();
+    });
+
+    $('#stopPhotoCapture').on('click', function () {
+        isCapturing = false;
+        $('#startPhotoCapture').prop('disabled', false);
+        $('#stopPhotoCapture').prop('disabled', true);
+        $('#captureStatus').text('Capture stopped');
+        if (photoCount > 0) {
+            $('#finishCapture').prop('disabled', false);
+        }
+    });
+
+    function capturePhotoLoop(retryCount = 0) {
+        if (!isCapturing || photoCount >= maxPhotos) {
+            if (photoCount >= maxPhotos) {
+                $('#captureStatus').text('Capture complete!');
+                $('#finishCapture').prop('disabled', false);
+            }
+            $('#startPhotoCapture').prop('disabled', false);
+            $('#stopPhotoCapture').prop('disabled', true);
+            return;
+        }
+
+        const video = document.getElementById('captureVideo');
+        const canvas = document.getElementById('captureCanvas');
+        const context = canvas.getContext('2d');
+
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw current video frame to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to base64
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+        // Send to server with retry logic
+        $.ajax({
+            url: `/api/capture_photo/${currentStudentId}`,
+            type: 'POST',
+            data: { image: imageData },
+            timeout: 10000, // 10 second timeout
+            success: function (response) {
+                photoCount++;
+                $('#photoCount').text(photoCount);
+                const progressPercent = (photoCount / maxPhotos) * 100;
+                $('#captureProgress').css('width', progressPercent + '%');
+
+                // Add thumbnail (show first 8)
+                if (photoCount <= 8) {
+                    $('#thumbnailContainer').append(
+                        `<div class="col-3 mb-2">
+                        <img src="${imageData}" class="img-thumbnail" style="width: 100%; height: 60px; object-fit: cover;">
+                    </div>`
+                    );
+                }
+
+                $('#captureStatus').text(`Captured ${photoCount}/${maxPhotos} photos...`);
+                // Continue capturing with increased delay for reliability
+                setTimeout(capturePhotoLoop, 500);
+            },
+            error: function (xhr, status, error) {
+                console.error('Photo capture error:', xhr.responseText);
+
+                // Retry logic: up to 3 retries per image
+                if (retryCount < 3) {
+                    $('#captureStatus').text(`Retrying photo ${photoCount + 1} (attempt ${retryCount + 2}/4)...`);
+                    setTimeout(() => capturePhotoLoop(retryCount + 1), 1000); // Wait 1 second before retry
+                } else {
+                    // Skip this photo and continue with next one
+                    $('#captureStatus').text(`Skipped photo ${photoCount + 1} after 3 retries. Continuing...`);
+                    photoCount++; // Count as attempted even if failed
+                    const progressPercent = (photoCount / maxPhotos) * 100;
+                    $('#captureProgress').css('width', progressPercent + '%');
+                    // Continue with next photo (don't pass retryCount to reset it)
+                    setTimeout(() => capturePhotoLoop(0), 500);
+                }
+            }
+        });
+    }
+
+    function finishCapture() {
+        // Mark attendance for this student
+        markStudentAttendance(currentStudentId);
+
+        $('#photoCaptureModal').modal('hide');
+        showAlert(`Photo capture completed! ${photoCount} photos saved and attendance marked.`, 'success');
+    }
+
+    function markStudentAttendance(studentId) {
+        // Get student details first
+        $.get(`/api/students/${studentId}`)
+            .done(function (student) {
+                // Mark attendance
+                $.ajax({
+                    url: '/api/mark_attendance',
+                    type: 'POST',
+                    data: {
+                        student_id: studentId,
+                        roll_no: student.Roll_No,
+                        name: student.Name
+                    },
+                    success: function () {
+                        $('#attendanceStatus').text('Present (Marked)');
+                    },
+                    error: function (xhr) {
+                        console.error('Attendance marking error:', xhr.responseText);
+                    }
+                });
+            });
+    }
+
+    function confirmDelete(studentId) {
+        $('#confirmDelete').data('student-id', studentId);
+        $('#deleteModal').modal('show');
+    }
+
+    function deleteStudent(studentId) {
+        $.ajax({
+            url: `/api/students/${studentId}`,
+            type: 'DELETE',
+            success: function () {
+                $('#deleteModal').modal('hide');
+                loadStudents();
+                showAlert('Student deleted successfully', 'success');
+            },
+            error: function () {
+                showAlert('Error deleting student', 'danger');
+            }
+        });
+    }
+
+    function showAlert(message, type) {
+        var alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+        $('.container-fluid').prepend(alertHtml);
+        setTimeout(function () {
+            $('.alert').fadeOut();
+        }, 5000);
+    }
+
+    // Camera functionality for student form
+    let studentStream = null;
+    let studentPhotoCount = 0;
+    let maxStudentPhotos = 20;
+    let isStudentCapturing = false;
+
+    async function startStudentCamera() {
+        // Auto-generate student ID if empty
+        let studentId = $('#studentId').val().trim();
+        if (!studentId) {
+            // Generate a unique student ID based on timestamp and random number
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            studentId = `STU${timestamp}${random}`;
+            $('#studentId').val(studentId); // Update the visible form field
+        }
+        $('#studentIdHidden').val(studentId); // Always set the hidden form field
+
+        // Validate all required fields before starting camera
+        const requiredFields = [
+            { id: 'studentId', name: 'Student ID' },
+            { id: 'studentName', name: 'Name' },
+            { id: 'department', name: 'Department' },
+            { id: 'course', name: 'Course' },
+            { id: 'year', name: 'Year' },
+            { id: 'semester', name: 'Semester' },
+            { id: 'division', name: 'Division' },
+            { id: 'rollNo', name: 'Roll Number' },
+            { id: 'gender', name: 'Gender' },
+            { id: 'dob', name: 'Date of Birth' },
+            { id: 'email', name: 'Email' },
+            { id: 'mobile', name: 'Mobile' },
+            { id: 'address', name: 'Address' }
+        ];
+
+        for (const field of requiredFields) {
+            const value = $(`#${field.id}`).val().trim();
+            if (!value) {
+                showAlert(`Please enter ${field.name} before starting photo capture.`, 'danger');
+                $(`#${field.id}`).focus();
+                return;
+            }
+        }
+
+        // Validate email format
+        const email = $('#email').val().trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showAlert('Please enter a valid email address.', 'danger');
+            $('#email').focus();
+            return;
+        }
+
+        try {
+            const video = document.getElementById('studentCamera');
+            studentStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 320, height: 240 }
+            });
+            video.srcObject = studentStream;
+            $('#cameraContainer').show();
+            $('#captureProgressContainer').show();
+            $('#startCameraBtn').hide();
+            $('#stopCaptureBtn').show();
+            $('#photoPreview').hide();
+
+            // Start automatic capture
+            isStudentCapturing = true;
+            studentPhotoCount = 0;
+            $('#captureStatus').text('Starting photo capture...');
+            $('#thumbnailContainer').empty();
+
+            setTimeout(captureStudentPhotoLoop, 1000); // Start after 1 second
+        } catch (err) {
+            console.error('Camera access error:', err);
+            showAlert('Camera access denied. Please allow camera permissions.', 'danger');
+        }
+    }
+
+    function stopStudentCapture() {
+        isStudentCapturing = false;
+        $('#captureStatus').text('Capture stopped');
+        $('#stopCaptureBtn').hide();
+        $('#startCameraBtn').show();
+
+        // Stop camera stream
+        if (studentStream) {
+            studentStream.getTracks().forEach(track => track.stop());
+            studentStream = null;
+        }
+        $('#cameraContainer').hide();
+        $('#captureProgressContainer').hide();
+    }
+
+    // Store captured photos temporarily
+    let capturedPhotos = [];
+
+    function captureStudentPhotoLoop() {
+        if (!isStudentCapturing || studentPhotoCount >= maxStudentPhotos) {
+            if (studentPhotoCount >= maxStudentPhotos) {
+                $('#captureStatus').text('Capture complete! Saving student and training model...');
+                $('#stopCaptureBtn').hide();
+
+                // Save student first, then send photos and train model
+                saveStudentAfterCapture();
+            }
+            return;
+        }
+
+        const video = document.getElementById('studentCamera');
+        const canvas = document.getElementById('studentCanvas');
+        const context = canvas.getContext('2d');
+
+        // Set canvas size to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw current video frame to canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to base64
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+        // Store photo temporarily
+        capturedPhotos.push(imageData);
+
+        studentPhotoCount++;
+        const progressPercent = (studentPhotoCount / maxStudentPhotos) * 100;
+        $('#captureProgress').css('width', progressPercent + '%');
+
+        // Add thumbnail (show first 8)
+        if (studentPhotoCount <= 8) {
+            $('#thumbnailContainer').append(
+                `<div class="col-3 mb-2">
+                <img src="${imageData}" class="img-thumbnail" style="width: 100%; height: 60px; object-fit: cover;">
+            </div>`
+            );
+        }
+
+        $('#captureStatus').text(`Captured ${studentPhotoCount}/${maxStudentPhotos} photos...`);
+
+        // Continue capturing with 500ms delay
+        setTimeout(captureStudentPhotoLoop, 500);
+    }
+
+    function saveStudentAfterCapture() {
+        // First save the student
+        var formData = new FormData($('#studentForm')[0]);
+        let studentId = $('#studentId').val().trim();
+
+        // Auto-generate student ID if empty
+        if (!studentId) {
+            // Generate a unique student ID based on timestamp and random number
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            studentId = `STU${timestamp}${random}`;
+            $('#studentId').val(studentId); // Update the visible form field
+            $('#studentIdHidden').val(studentId); // Update the hidden form field
+            formData.set('student_id', studentId); // Update FormData
+            console.log('Generated student ID:', studentId);
+        }
+
+        console.log('Final student ID being sent:', studentId);
+        console.log('Form data student_id:', formData.get('student_id'));
+
+        $.ajax({
+            url: '/api/students',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#captureStatus').text('Student saved! Now saving photos...');
+
+                // Use the student ID from the response to ensure it's correct
+                const savedStudentId = response.student_id || studentId;
+
+                // Now send all captured photos
+                sendCapturedPhotos(savedStudentId);
+            },
+            error: function (xhr) {
+                var error = xhr.responseJSON ? xhr.responseJSON.error : 'Error saving student';
+                $('#captureStatus').text('Error saving student: ' + error);
+                console.error('Save student error:', error);
+                showAlert(error, 'danger');
+
+                // Reset UI
+                $('#startCameraBtn').show();
+                $('#stopCaptureBtn').hide();
+                if (studentStream) {
+                    studentStream.getTracks().forEach(track => track.stop());
+                    studentStream = null;
+                }
+                $('#cameraContainer').hide();
+                $('#captureProgressContainer').hide();
+            }
+        });
+    }
+
+    function sendCapturedPhotos(studentId) {
+        let sentCount = 0;
+        const totalPhotos = capturedPhotos.length;
+
+        function sendNextPhoto() {
+            if (sentCount >= totalPhotos) {
+                // All photos sent, now train the model
+                $('#captureStatus').text('All photos saved! Training model...');
+                trainModelAfterCapture();
+                return;
+            }
+
+            const imageData = capturedPhotos[sentCount];
+
+            $.ajax({
+                url: `/api/capture_photo/${studentId}`,
+                type: 'POST',
+                data: { image: imageData },
+                timeout: 10000,
+                success: function (response) {
+                    sentCount++;
+                    $('#captureStatus').text(`Saved ${sentCount}/${totalPhotos} photos...`);
+                    sendNextPhoto();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Photo save error:', xhr.responseText);
+                    sentCount++;
+                    $('#captureStatus').text(`Error saving photo ${sentCount}, continuing...`);
+                    sendNextPhoto();
+                }
+            });
+        }
+
+        sendNextPhoto();
+    }
+
+    function trainModelAfterCapture() {
+        // Get student ID
+        const studentId = $('#studentId').val();
+
+        $.ajax({
+            url: '/api/train_model',
+            type: 'POST',
+            success: function (response) {
+                $('#captureStatus').text('Model trained successfully!');
+                $('#photoPreview').show();
+                $('#startCameraBtn').show();
+                $('#stopCaptureBtn').hide();
+
+                // Stop camera stream
+                if (studentStream) {
+                    studentStream.getTracks().forEach(track => track.stop());
+                    studentStream = null;
+                }
+                $('#cameraContainer').hide();
+                $('#captureProgressContainer').hide();
+
+                showAlert(`Successfully captured ${studentPhotoCount} photos and trained the model!`, 'success');
+            },
+            error: function (xhr) {
+                console.error('Training error:', xhr.responseText);
+                $('#captureStatus').text('Training failed, but photos were saved.');
+                $('#photoPreview').show();
+                $('#startCameraBtn').show();
+                $('#stopCaptureBtn').hide();
+
+                // Stop camera stream
+                if (studentStream) {
+                    studentStream.getTracks().forEach(track => track.stop());
+                    studentStream = null;
+                }
+                $('#cameraContainer').hide();
+                $('#captureProgressContainer').hide();
+
+                showAlert('Photos captured successfully, but model training failed.', 'warning');
+            }
+        });
+    }
+
+    // Mark attendance when user logs in and captures photo
+    function markUserAttendanceOnLogin() {
+        // This function would be called when user logs in and captures photo
+        // Get current user info from session
+        const currentUser = "{{ session.get('username', 'None') }}";
+        if (currentUser && currentUser !== 'None') {
+            // Mark attendance for the logged-in user
+            $.ajax({
+                url: '/api/mark_attendance',
+                type: 'POST',
+                data: {
+                    student_id: currentUser, // Assuming username is student ID
+                    roll_no: 'AUTO', // Auto-generated
+                    name: currentUser
+                },
+                success: function () {
+                    console.log('Attendance marked for user login');
+                },
+                error: function (xhr) {
+                    console.error('Attendance marking error:', xhr.responseText);
+                }
+            });
+        }
+    }
+
+    // Call this when photo is captured in student form
+    function onStudentPhotoCaptured() {
+        // Mark attendance when photo is captured
+        markUserAttendanceOnLogin();
+    }
+</script>
+{% endblock %}

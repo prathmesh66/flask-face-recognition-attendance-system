@@ -1,0 +1,45 @@
+Face Recognition Attendance System
+
+Technology Stack Summary
+Backend Framework
+Python Flask: Web framework for building the REST API and web application
+Flask Extensions:
+Flask-WTF: Form handling and validation
+Flask-Mail: Email functionality (registration verification)
+Flask-Login: User authentication and session management
+Flask-Session: Session storage
+Database
+MySQL: Relational database for storing student data, attendance records, and user accounts
+PyMySQL: Python MySQL connector for database operations
+Computer Vision & AI
+OpenCV (opencv-contrib-python): Face detection and recognition using LBPH (Local Binary Patterns Histograms) algorithm
+Haar Cascade Classifier: Pre-trained face detection model (haarcascade_frontalface_default.xml)
+NumPy: Numerical computing for image processing
+Pillow (PIL): Image manipulation and format conversion
+Frontend
+HTML5: Markup language for web pages
+Bootstrap 5.1.3: CSS framework for responsive design and UI components
+Font Awesome 6.0.0: Icon library
+jQuery 3.6.0: JavaScript library for DOM manipulation and AJAX requests
+Custom CSS: Application-specific styling (style.css)
+Custom JavaScript: Client-side functionality (main.js)
+Data Processing & Export
+Pandas: Data manipulation for attendance reports
+OpenPyXL: Excel file generation for exports
+Security & Validation
+Werkzeug: Password hashing and security utilities
+Email-Validator: Email format validation
+WTForms: Form validation and CSRF protection
+Additional Libraries
+Secrets: Secure token generation for email verification
+Datetime: Date and time handling
+Glob: File system operations for image management
+Base64: Image encoding/decoding for web uploads
+IO: File stream handling
+CSV: CSV export functionality
+Architecture
+MVC Pattern: Flask handles routing, templates for views, and database models
+RESTful API: JSON-based endpoints for student management, face recognition, and attendance marking
+Session-Based Authentication: User login/logout with role-based access control (admin/user)
+File-Based Storage: Images stored in local directories, trained models saved as XML/Pickle files
+The application is a full-stack web system combining computer vision for face recognition with traditional web development technologies for user management and attendance tracking.

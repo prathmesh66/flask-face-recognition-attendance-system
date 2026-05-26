@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Train Model - Face Recognition Attendance System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="mb-4"><i class="fas fa-brain"></i> Model Training</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Training Process</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Click the button below to train the face recognition model using the collected student images.</p>
+
+                <div class="text-center mb-4">
+                    <button id="startTraining" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play"></i> Start Training
+                    </button>
+                </div>
+
+                <div id="trainingProgress" class="mb-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-1" id="progressText">Initializing training...</small>
+                </div>
+
+                <div id="trainingResult"></div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-images fa-2x text-primary mb-2"></i>
+                                <h6>Images Found</h6>
+                                <p class="mb-0">
+                                    {{ image_count or 0 }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-code fa-2x text-success mb-2"></i>
+                                <h6>Model Status</h6>
+                                <p class="mb-0">
+                                    {% if clf_exists %}
+                                        <span class="text-success">Trained</span>
+                                    {% else %}
+                                        <span class="text-warning">Not Trained</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Training Info</h5>
+            </div>
+            <div class="card-body">
+                <h6>How Training Works:</h6>
+                <ol class="small">
+                    <li>Scans all images in the <code>data_img</code> folder</li>
+                    <li>Extracts facial features from each image</li>
+                    <li>Creates a unique model for each student</li>
+                    <li>Saves the trained model as <code>clf.xml</code></li>
+                    <li>Creates ID mapping for recognition</li>
+                </ol>
+
+                <hr>
+
+                <h6>Requirements:</h6>
+                <ul class="small">
+                    <li>At least 10 images per student</li>
+                    <li>Clear, well-lit face images</li>
+                    <li>Various angles and expressions</li>
+                </ul>
+
+                <hr>
+
+                <div class="alert alert-warning small">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Note:</strong> Training may take several minutes depending on the number of images.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-folder-open"></i> Training Data</h5>
+            </div>
+            <div class="card-body">
+                <p>Training images are stored in the <code>data_img</code> folder. Each image should be named as <code>student.[ID].[number].jpg</code></p>
+
+                <div class="text-center">
+                    <button class="btn btn-outline-primary" onclick="window.open('data_img', '_blank')">
+                        <i class="fas fa-external-link-alt"></i> Open Data Folder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

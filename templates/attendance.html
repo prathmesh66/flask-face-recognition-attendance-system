@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Management - Face Recognition Attendance System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="mb-4"><i class="fas fa-clipboard-list"></i> Attendance Management</h2>
+
+        {% if user_role == 'user' %}
+        <!-- User-specific summary cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Days Present</h5>
+                        <h2>{{ records|selectattr('std_attendance', 'equalto', 'Present')|list|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Records</h5>
+                        <h2>{{ records|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">This Month</h5>
+                        <h2>{% set current_month = records|selectattr('std_date', 'defined')|selectattr('std_date', 'ne', None)|list %}
+                            {% set month_count = 0 %}
+                            {% for record in current_month %}
+                                {% if record.std_date and (record.std_date|string).startswith('2024-') %}
+                                    {% set month_count = month_count + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ month_count }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Attendance Rate</h5>
+                        <h2>{% if records %}{{ (records|selectattr('std_attendance', 'equalto', 'Present')|list|length / records|length * 100)|round(1) }}{% else %}0{% endif %}%</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if user_role == 'admin' %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-plus"></i> Manual Attendance Entry</h5>
+            </div>
+            <div class="card-body">
+                <form id="attendanceForm" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="studentId" class="form-label">Student ID</label>
+                        <input type="text" class="form-control" id="studentId" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="attendanceDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="attendanceDate" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="attendanceTime" class="form-label">Time</label>
+                        <input type="time" class="form-control" id="attendanceTime" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="attendanceStatus" class="form-label">Status</label>
+                        <select class="form-control" id="attendanceStatus" required>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Add Attendance
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-upload"></i> CSV Import</h5>
+            </div>
+            <div class="card-body">
+                <form id="csvImportForm" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="csvFile" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="csvFile" accept=".csv" required>
+                            <div class="form-text">
+                                CSV format: Student_ID, Roll_No, Name, Date, Time, Status
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-upload"></i> Import CSV
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-table"></i>
+                    {% if user_role == 'admin' %}
+                        Attendance Records (Admin View)
+                    {% else %}
+                        My Attendance Records
+                    {% endif %}
+                </h5>
+                {% if user_role == 'admin' %}
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="exportAttendance('csv')">
+                        <i class="fas fa-download"></i> Export CSV
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportAttendance('excel')">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="generateReport()">
+                        <i class="fas fa-chart-bar"></i> Generate Report
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Student ID</th>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td>{{ record.id }}</td>
+                                <td>{{ record.std_id }}</td>
+                                <td>{{ record.std_roll_no }}</td>
+                                <td>{{ record.std_name }}</td>
+                                <td>{{ record.std_date }}</td>
+                                <td>{{ record.std_time }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if record.std_attendance == 'Present' else 'danger' }}">
+                                        {{ record.std_attendance }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if not records %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No attendance records found</h5>
+                    <p class="text-muted">Attendance records will appear here once students are recognized.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-chart-bar"></i> Attendance Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reportContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Generating report...</span>
+                        </div>
+                        <p class="mt-2">Generating attendance report...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="exportReport()">
+                    <i class="fas fa-download"></i> Export Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Set default date and time for manual attendance
+    const today = new Date();
+    $('#attendanceDate').val(today.toISOString().split('T')[0]);
+    $('#attendanceTime').val(today.toTimeString().slice(0, 5));
+
+    // Handle manual attendance form submission
+    $('#attendanceForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const formData = {
+            student_id: $('#studentId').val(),
+            date: $('#attendanceDate').val(),
+            time: $('#attendanceTime').val(),
+            status: $('#attendanceStatus').val()
+        };
+
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+
+        $.ajax({
+            url: '/api/attendance',
+            type: 'POST',
+            contentType: 'application/x-www-form-urlencoded',
+            data: formData,
+            success: function(response) {
+                showAlert('Attendance recorded successfully!', 'success');
+                clearForm();
+                // Refresh the page to show updated records
+                setTimeout(() => location.reload(), 1500);
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to save attendance';
+                showAlert(error, 'danger');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Handle CSV import form submission
+    $('#csvImportForm').on('submit', function(e) {
+        e.preventDefault();
+
+        const fileInput = $('#csvFile')[0];
+        if (!fileInput.files[0]) {
+            showAlert('Please select a CSV file', 'warning');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Importing...');
+
+        $.ajax({
+            url: '/api/attendance/import',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                showAlert(response.message, 'success');
+                $('#csvFile').val('');
+                // Refresh the page to show updated records
+                setTimeout(() => location.reload(), 1500);
+            },
+            error: function(xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to import CSV';
+                showAlert(error, 'danger');
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+});
+
+function clearForm() {
+    $('#attendanceForm')[0].reset();
+    // Reset to current date and time
+    const today = new Date();
+    $('#attendanceDate').val(today.toISOString().split('T')[0]);
+    $('#attendanceTime').val(today.toTimeString().slice(0, 5));
+}
+
+function showAlert(message, type) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    $('.container-fluid').prepend(alertHtml);
+    setTimeout(() => $('.alert').fadeOut(), 5000);
+}
+
+function exportAttendance(format) {
+    // Show loading message
+    showAlert(`Exporting attendance data as ${format.toUpperCase()}...`, 'info');
+
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = `/api/export_attendance/${format}`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showAlert(`Attendance data exported as ${format.toUpperCase()} successfully!`, 'success');
+}
+
+function generateReport() {
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+    modal.show();
+
+    // Get attendance data from table
+    const rows = document.querySelectorAll('tbody tr');
+    let totalRecords = 0;
+    let presentCount = 0;
+    let absentCount = 0;
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 7) {
+            totalRecords++;
+            const status = cells[6].querySelector('.badge').textContent.trim();
+            if (status.toLowerCase() === 'present') {
+                presentCount++;
+            } else {
+                absentCount++;
+            }
+        }
+    });
+
+    const attendanceRate = totalRecords > 0 ? ((presentCount / totalRecords) * 100).toFixed(1) : '0.0';
+
+    // Generate report HTML
+    const reportHTML = `
+        <div class="text-center mb-4">
+            <h4>Attendance Report</h4>
+            <p class="text-muted">Generated on ${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="row text-center mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Records</h5>
+                        <h2>${totalRecords}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Present</h5>
+                        <h2>${presentCount}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Absent</h5>
+                        <h2>${absentCount}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <h5>Attendance Rate: <span class="badge bg-info">${attendanceRate}%</span></h5>
+        </div>
+
+        <hr>
+
+        <h6>Detailed Records:</h6>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Roll No</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    let tableRows = '';
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 7) {
+            const status = cells[6].querySelector('.badge').textContent.trim();
+            tableRows += `
+                <tr>
+                    <td>${cells[1].textContent.trim()}</td>
+                    <td>${cells[3].textContent.trim()}</td>
+                    <td>${cells[2].textContent.trim()}</td>
+                    <td>${cells[4].textContent.trim()}</td>
+                    <td>${cells[5].textContent.trim()}</td>
+                    <td><span class="badge bg-${status.toLowerCase() === 'present' ? 'success' : 'danger'}">${status}</span></td>
+                </tr>
+            `;
+        }
+    });
+
+    const finalReport = reportHTML + tableRows + `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    document.getElementById('reportContent').innerHTML = finalReport;
+}
+
+function exportReport() {
+    const reportContent = document.getElementById('reportContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Attendance Report</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        </head>
+        <body>
+            ${reportContent}
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+</script>
+{% endblock %}
