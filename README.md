@@ -1,6 +1,6 @@
 # Face Recognition Attendance System (Flask + OpenCV)
 
-> ⚠️ **Important Note**  
+> ⚠️ **⚠️ Public Showcase Repository**  
 > This repository contains a public showcase version of the project.  
 > Certain sensitive/internal implementation details and advanced logic have been intentionally simplified or removed for security and project protection purposes.
 
