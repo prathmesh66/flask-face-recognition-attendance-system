@@ -9,6 +9,12 @@ A web-based attendance system that uses face recognition (OpenCV LBPH) to mark a
 - Face recognition API
 - Attendance marking + export
 
+# 🎥 Project Demo Videos
+
+## Face Recognition Attendance System
+
+[![Face Recognition Attendance System](https://img.youtube.com/vi/UfwXV1CNXo4/maxresdefault.jpg)](https://youtu.be/UfwXV1CNXo4)
+
 ## Project Setup
 ### 1) Install dependencies
 ```bash
@@ -47,4 +53,3 @@ Then open the app in your browser (usually `http://127.0.0.1:5000`).
 - If face recognition says the model is not trained, run `/train` first.
 - Ensure your MySQL service is running.
 - For email sending, configure Flask-Mail credentials in `app.py`.
-
